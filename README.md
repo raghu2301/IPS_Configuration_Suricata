@@ -33,8 +33,8 @@ Edit the configuration file to IPS
 sudo nano suricata.yaml
 ```
 Make the following changes in the **af-packet** section:
-af-packet:
 ```
+af-packet:
   - interface: eth0
   - threads: auto
   - cluster-id: 99
@@ -49,14 +49,12 @@ af-packet:
 
 Make the following changes in the **nfq** section:
 
-
-  nfqueue:
-  
-mode: repeat
-
-fail-open: yes
-
-enabled: yes
+```
+nfqueue:
+ mode: repeat
+ fail-open: yes
+ enabled: yes
+```
 
 
 Run a config change success test:
@@ -116,5 +114,5 @@ sudo nano fast.log
 ```
 
 ## Conclusion
-Intrusion Prevention Systems (IPS) are a vital component of modern cybersecurity frameworks, offering proactive protection by detecting and blocking malicious activities in real-time. IPS actively prevents threats by halting malicious traffic, thereby reducing the risk of data breaches, system compromises, and downtime.
+**Intrusion Prevention Systems (IPS)** are a vital component of modern cybersecurity frameworks, offering proactive protection by detecting and blocking malicious activities in real-time. IPS actively prevents threats by halting malicious traffic, thereby reducing the risk of data breaches, system compromises, and downtime.
 IPS provides a robust defense against sophisticated cyberattacks. As organizations continue to face an increasing volume and complexity of threats, IPS will remain essential for maintaining secure and resilient systems in a dynamic digital landscape.
