@@ -1,0 +1,79 @@
+# 1. Ping (ICMP Echo Request/Reply)
+drop icmp any any -> $HOME_NET any (msg:"ICMP Ping Request"; itype:8; sid:1000001; rev:1;)
+drop icmp $HOME_NET any -> any any (msg:"ICMP Ping Reply"; itype:0; sid:1000002; rev:1;)
+
+# 2. SSH Brute Force
+drop tcp $EXTERNAL_NET any -> $HOME_NET 22 (msg:"SSH Brute Force Attack"; threshold: type threshold, track by_src, count 5, seconds 60; sid:1000003; rev:1;)
+
+# 3. Telnet Access and Brute Force
+drop tcp $EXTERNAL_NET any -> $HOME_NET 23 (msg:"Telnet Access Attempt"; sid:1000004; rev:1;)
+drop tcp $EXTERNAL_NET any -> $HOME_NET 23 (msg:"Telnet Brute Force"; content:"login: "; threshold: type threshold, track by_src, count 5, seconds 60; sid:1000005; rev:1;)
+
+# 4. FTP Access and Brute Force
+drop tcp $EXTERNAL_NET any -> $HOME_NET 21 (msg:"FTP Login Attempt"; flow:to_server,established; content:"USER "; sid:1000006; rev:1;)
+drop tcp $EXTERNAL_NET any -> $HOME_NET 21 (msg:"FTP Brute Force Attack"; flow:to_server,established; content:"PASS "; threshold: type threshold, track by_src, count 5, seconds 60; sid:1000007; rev:1;)
+
+# 5. Nmap SYN Scan
+drop tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"Nmap SYN Scan Detected"; flags:S; threshold: type both, track by_src, count 20, seconds 3; sid:1000008; rev:1;)
+
+# 6. Nmap Xmas Scan
+drop tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"Nmap Xmas Scan Detected"; flags: FPU; threshold: type both, track by_src, count 10, seconds 3; sid:1000009; rev:1;)
+
+# 7. Nmap FIN Scan
+#drop tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"Nmap FIN Scan Detected"; flags:F; threshold: type both, track by_src, count 10, seconds 3; sid:1000010; rev:1;)
+
+# 8. Nmap Null Scan
+#drop tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"Nmap Null Scan Detected"; flags:0; threshold: type both, track by_src, count 10, seconds 3; sid:1000011; rev:1;)
+
+# 9. Metasploit Exploit Attempts (Generic Shellcode)
+drop tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"Metasploit Shellcode Detected"; content:"|90 90 90 90|"; classtype:shellcode-detect; sid:1000012; rev:1;)
+drop tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"Metasploit Exploit Attempt"; content:"msf"; classtype:attempted-admin; sid:1000013; rev:1;)
+
+# 10. SQLMap SQL Injection (Union Select)
+drop http $EXTERNAL_NET any -> $HOME_NET any (msg:"SQLMap SQL Injection Attempt"; content:"union select"; http_uri; sid:1000014; rev:1;)
+drop http $EXTERNAL_NET any -> $HOME_NET any (msg:"SQLMap SQL Injection - Generic"; content:"and 1=1"; http_uri; sid:1000015; rev:1;)
+
+# 11. XSS (Cross-Site Scripting)
+drop http $EXTERNAL_NET any -> $HOME_NET any (msg:"XSS Attack Detected"; content:"<script>"; nocase; http_uri; sid:1000016; rev:1;)
+
+# 12. Remote File Inclusion (RFI)
+drop http $EXTERNAL_NET any -> $HOME_NET any (msg:"Remote File Inclusion Detected"; content:"http://"; nocase; http_uri; content:".php?"; http_uri; sid:1000017; rev:1;)
+
+# 13. Command Injection Attempt
+drop http $EXTERNAL_NET any -> $HOME_NET any (msg:"Command Injection Attempt"; content:";id"; nocase; http_uri; sid:1000018; rev:1;)
+
+# 14. DNS Tunneling
+drop dns $EXTERNAL_NET any -> $HOME_NET any (msg:"DNS Tunneling Attempt Detected"; content:"Base64"; sid:1000019; rev:1;)
+
+# 15. Burp Suite Scanner
+drop http $EXTERNAL_NET any -> $HOME_NET any (msg:"Burp Suite Scanner Detected"; content:"Mozilla/5.0 (compatible; Burp Suite)"; http_user_agent; sid:1000020; rev:1;)
+
+# 16. OWASP ZAP Scanner
+drop http $EXTERNAL_NET any -> $HOME_NET any (msg:"OWASP ZAP Scanner Detected"; content:"Mozilla/5.0 (Windows NT 6.1; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0"; http_user_agent; sid:1000021; rev:1;)
+
+# 17. DirBuster Scan
+drop http $EXTERNAL_NET any -> $HOME_NET any (msg:"DirBuster Scan Detected"; content:"DirBuster"; http_user_agent; sid:1000022; rev:1;)
+
+# 18. BeEF (Browser Exploitation Framework Hook)
+drop http $EXTERNAL_NET any -> $HOME_NET any (msg:"BeEF Hook Detected"; content:"/hook.js"; http_uri; sid:1000023; rev:1;)
+
+# 19. DoS/DDoS (SYN Flood)
+drop tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"DoS/DDoS SYN Flood Detected"; flags:S; threshold: type both, track by_src, count 100, seconds 1; sid:1000024; rev:1;)
+
+# 20. Slowloris Attack (DoS)
+drop tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"Slowloris DoS Attack"; flow:to_server,established; flags:S; threshold: type both, track by_src, count 100, seconds 10; sid:1000025; rev:1;)
+
+# 21. HTTP Request Flood (DDoS)
+drop http $EXTERNAL_NET any -> $HOME_NET any (msg:"HTTP Flood Detected"; threshold: type both, track by_src, count 50, seconds 5; sid:1000026; rev:1;)
+
+# 22. DNS Amplification Attack (DDoS)
+drop dns $EXTERNAL_NET any -> $HOME_NET any (msg:"DNS Amplification Attack Detected"; content:"|85 A0|"; offset:2; depth:2; threshold: type both, track by_src, count 100, seconds 10; sid:1000027; rev:1;)
+
+# 23. Brute Force Attack (Generic)
+drop tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"Brute Force Attack Detected"; threshold: type threshold, track by_src, count 10, seconds 60; sid:1000028; rev:1;)
+
+# 24. SMB Brute Force Attack
+drop tcp $EXTERNAL_NET any -> $HOME_NET 445 (msg:"SMB Brute Force Detected"; flow:to_server,established; content:"NTLMSSP"; threshold: type threshold, track by_src, count 5, seconds 60; sid:1000029; rev:1;)
+
+# 25. HTTP Brute Force Attack
+drop http $EXTERNAL_NET any -> $HOME_NET any (msg:"HTTP Brute Force Attack Detected"; content:"POST"; threshold: type threshold, track by_src, count 10, seconds 60; sid:1000030; rev:1;)
